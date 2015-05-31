@@ -1,0 +1,3 @@
+[submodule "roles/postgresql"]
+	path = roles/postgresql
+	url = git@github.com:Open-Future-Belgium/PostgreSQL.git

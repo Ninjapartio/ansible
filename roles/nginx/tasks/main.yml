@@ -1,0 +1,46 @@
+---
+
+- name: Nginx repository
+  copy: src=nginx.repo dest=/etc/yum.repos.d/nginx.repo
+  when: ansible_os_family == 'RedHat'
+
+- name: Add Nginx repo key
+  apt_key: keyserver=keyserver.ubuntu.com id=ABF5BD827BD9BF62
+  when: ansible_os_family == 'Debian'
+
+- name: Nginx repository
+  apt_repository: repo='deb http://nginx.org/packages/ubuntu/ trusty nginx'
+  when: ansible_os_family == 'Debian'
+
+- name: Install nginx
+  yum: name=nginx state=installed
+  when: ansible_os_family == 'RedHat'
+  notify: restart nginx
+
+- name: Install nginx
+  apt: name=nginx state=installed
+  when: ansible_os_family == 'Debian'
+  notify: restart nginx
+
+- name: Nginx user
+  user: name=nginx system=yes
+  when: ansible_os_family == 'Debian'
+
+- name: Remove default nginx files
+  file: name=/etc/nginx/conf.d state=absent
+
+- name: Create nginx directories
+  file: name=/etc/nginx/{{item}} state=directory
+  with_items: ['sites-enabled', 'includes']
+
+- name: Copy nginx confs
+  copy: src={{item}} dest=/etc/nginx/{{item}}
+  with_items:
+  - nginx.conf
+  - sites-enabled/no-default.conf
+  - includes/ssl.conf
+  - includes/ssl-stapling.conf
+  notify: restart nginx
+
+- name: Start nginx
+  service: name=nginx state=started

@@ -1,0 +1,6 @@
+---
+users:
+  - name: juho
+    keys:
+      - juho-desktop.pub
+      - juho-laptop.pub

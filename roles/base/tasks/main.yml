@@ -1,0 +1,27 @@
+---
+
+- include: centos.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Use Finnish Ubuntu mirror
+  replace: dest=/etc/apt/sources.list regexp='http://us\.archive\.' replace='http://fi.archive.'
+  notify: update-apt
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure that base packages are present
+  apt: name={{ item }} state=present
+  with_items:
+    - rsync
+    - vim
+    - htop
+    - ntp
+    - language-pack-fi-base
+  when: ansible_os_family == 'Debian'
+
+- name: Disable DNS lookups for SSH
+  lineinfile: dest=/etc/ssh/sshd_config regexp='^UseDNS' line='UseDNS no' state=present
+  notify: reload ssh
+
+- name: No root over ssh
+  lineinfile: dest=/etc/ssh/sshd_config regexp='^PermitRootLogin' line='PermitRootLogin no' state=present
+  notify: reload ssh

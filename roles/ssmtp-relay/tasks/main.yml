@@ -1,0 +1,10 @@
+---
+
+- name: Install software
+  apt: name={{item}} state=installed
+  with_items:
+  - ssmtp
+  - mailutils
+
+- name: Copy config
+  template: src=ssmtp.conf.j2 dest=/etc/ssmtp/ssmtp.conf

@@ -1,0 +1,35 @@
+---
+- hosts: ninjapartio
+  vars_files:
+  - "vars/encrypted.yml"
+  roles:
+    - base
+    - users
+    - nginx
+    - postgresql
+  tasks:
+  - name: Install php
+    yum: name=php-fpm state=installed
+  - name: Start php
+    service: name=php-fpm state=started
+  - name: Remove bad php confs
+    file: path=/etc/php-fpm.d/www.conf
+    notify:
+    - restart php-fpm
+  - name: Create ninjapartio php conf
+    copy: src=files/ninjapartio.conf dest=/etc/php-fpm.d/ninjapartio.conf
+    notify:
+    - restart php-fpm
+  - name: App user
+    user: name=ninjapartio state=present
+  - name: Copy ninjapartio nginx conf
+    template: src=template/site.conf.j2 dest=/etc/nginx/sites-enabled/ninjapartio.conf
+    notify:
+    - reload nginx
+  - name: Create phpbb config.php
+    template: src=template/config.php.j2 dest=/home/juho/ninjapartio/docroot/config.php owner=ninjapartio group=ninjapartio
+  handlers:
+  - name: reload nginx
+    service: name=nginx state=reloaded
+  - name: restart php-fpm
+    service: name=php-fpm state=restarted

@@ -1,0 +1,26 @@
+server {
+  listen 80;
+  listen [::]:80;
+
+  server_name ninjapartio.com;
+  return 301 http://www.ninjapartio.com$request_uri;
+}
+
+server {
+  listen 80;
+  listen [::]:80;
+
+  server_name www.ninjapartio.com;
+  client_max_body_size 12m;
+  root /home/juho/ninjapartio/docroot;
+
+  index portal.php index.html;
+
+  location ~ \.php$ {
+    try_files $uri =404;
+    fastcgi_pass unix:/var/run/php-fpm/ninjapartio.sock;
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    include fastcgi_params;
+  }
+}

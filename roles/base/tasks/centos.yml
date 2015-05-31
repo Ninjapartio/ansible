@@ -1,0 +1,22 @@
+---
+
+- name: Install the libselinux-python package
+  yum: name=libselinux-python state=installed
+
+- name: Epel key
+  copy: src=epel.key dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+
+- name: Epel repository
+  copy: src=epel.repo dest=/etc/yum.repos.d/epel.repo
+
+- name: Ensure that base packages are present
+  yum: name={{ item }} state=present
+  with_items:
+    - rsync
+    - vim
+    - htop
+    - ntp
+    - git
+
+- name: ntp service
+  service: name=ntpd enabled=yes state=started
